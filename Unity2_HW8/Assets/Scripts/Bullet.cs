@@ -15,7 +15,7 @@ public class Bullet : MonoBehaviour, IPoolable {
 	private string poolID = "Bullet";
 	public string PoolID { get { return poolID; } }
 	[SerializeField]
-	private int objectsCount = 5;
+	private int objectsCount = 100;
 	public int ObjectsCount { get { return objectsCount; } }
 	public bool IsActive { get { return gameObject.activeSelf; } }
 

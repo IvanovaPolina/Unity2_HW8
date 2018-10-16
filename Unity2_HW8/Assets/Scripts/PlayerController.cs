@@ -7,13 +7,13 @@ public class PlayerController : NetworkBehaviour {
 	private float moveSpeed = 1.5f;
 	[SerializeField]
 	private float rotationSpeed = 30f;
-
-	[SerializeField]
-	private Rigidbody bullet;
+	
 	[SerializeField]
 	private float bulletSpeed = 10f;
 	[SerializeField]
 	private Transform firepoint;
+	[SerializeField]
+	private string bulletID = "Bullet";
 
 	[SerializeField]
 	private Material playerMaterial;
@@ -22,6 +22,11 @@ public class PlayerController : NetworkBehaviour {
 
 	[SerializeField]
 	private Transform cameraPos;
+
+	[SerializeField]
+	private Transform turret;
+	[SerializeField]
+	private float turretRotSpeed = 40f;
 
 	private void Start() {
 		if (!isLocalPlayer) {
@@ -45,14 +50,20 @@ public class PlayerController : NetworkBehaviour {
 
 		transform.Rotate(0, y, 0);
 		transform.Translate(0, 0, z);
+		RotateTurret();
 
 		if (Input.GetButtonDown("Fire1")) CmdFire();
 	}
 
+	private void RotateTurret() {
+		float y = Input.GetAxis("Turret") * Time.deltaTime * turretRotSpeed;
+		turret.Rotate(0, y, 0);
+	}
+
 	[Command]
 	private void CmdFire() {
-		var tempBullet = Instantiate(bullet, firepoint.position, firepoint.rotation);
-		tempBullet.velocity = tempBullet.transform.forward * bulletSpeed;
+		Bullet tempBullet = ObjectsPool.Instance.GetObject(bulletID) as Bullet;
+		tempBullet.Initialize(firepoint, bulletSpeed);
 		NetworkServer.Spawn(tempBullet.gameObject);
 	}
 }

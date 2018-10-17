@@ -25,6 +25,9 @@ public class PlayerController : NetworkBehaviour {
 	[SerializeField]
 	private float turretRotSpeed = 40f;
 
+	[SerializeField]
+	private Transform cam;
+
 	private void Start() {
 		if (!isLocalPlayer) {
 			var renderers = GetComponentsInChildren<Renderer>();
@@ -32,6 +35,10 @@ public class PlayerController : NetworkBehaviour {
 				for (int i = 0; i < rend.materials.Length; i++)
 					if (rend.materials[i].color == playerMaterial.color)
 						rend.materials[i].color = enemyMaterial.color;
+		} else {
+			Camera.main.transform.position = Vector3.zero;
+			Camera.main.transform.rotation = new Quaternion(0, 0, 0, 1);
+			Camera.main.transform.SetParent(cam, false);
 		}
 	}
 
@@ -44,7 +51,7 @@ public class PlayerController : NetworkBehaviour {
 		transform.Rotate(0, y, 0);
 		transform.Translate(0, 0, z);
 		RotateTurret();
-
+		
 		if (Input.GetButtonDown("Fire1")) CmdFire();
 	}
 
@@ -56,7 +63,8 @@ public class PlayerController : NetworkBehaviour {
 	[Command]
 	private void CmdFire() {
 		Bullet tempBullet = ObjectsPool.Instance.GetObject(bulletID) as Bullet;
-		tempBullet.Initialize(firepoint, bulletSpeed);
+		tempBullet.Initialize(firepoint);
+		tempBullet.GetComponent<Rigidbody>().velocity = tempBullet.transform.forward * bulletSpeed;
 		NetworkServer.Spawn(tempBullet.gameObject);
 	}
 }

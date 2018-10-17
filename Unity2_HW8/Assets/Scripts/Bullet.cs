@@ -5,10 +5,9 @@ public class Bullet : MonoBehaviour, IPoolable {
 	[SerializeField]
 	private int damage = 10;
 	[SerializeField]
-	private float lifetime = 2f;
+	private float lifetime = 3f;
 	[SerializeField]
 	private LayerMask layerMask;
-	private float speed;
 	private bool isHitted = false;
 
 	[SerializeField]
@@ -19,32 +18,23 @@ public class Bullet : MonoBehaviour, IPoolable {
 	public int ObjectsCount { get { return objectsCount; } }
 	public bool IsActive { get { return gameObject.activeSelf; } }
 
-	public void Initialize(Transform firepoint, float speed) {
+	public void Initialize(Transform firepoint) {
 		transform.position = firepoint.position;
 		transform.rotation = firepoint.rotation;
 		CancelInvoke();
 		isHitted = false;
-		this.speed = speed;
 		Invoke("Disable", lifetime);
 		gameObject.SetActive(true);
 	}
 
-	private void FixedUpdate() {
+	private void OnCollisionEnter(Collision other) {
 		if (isHitted) return;
-		Vector3 finalPos = transform.position + transform.forward * speed * Time.fixedDeltaTime;
-		RaycastHit hit;
-		if (Physics.Linecast(transform.position, finalPos, out hit, layerMask)) {
-			isHitted = true;
-			transform.position = hit.point;
-			SetDamage(hit);
-			Disable();
-		} else transform.position = finalPos;
-	}
-
-	private void SetDamage(RaycastHit hit) {
-		var obj = hit.collider.GetComponent<IGetDamage>();
-		if (obj == null) return;
-		obj.GetDamage(damage);
+		bool isNeededLayer = (1 << other.gameObject.layer & layerMask.value) != 0;
+		if (!isNeededLayer) return;
+		isHitted = true;
+		var obj = other.collider.GetComponent<IGetDamage>();
+		if (obj != null) obj.GetDamage(damage);
+		Disable();
 	}
 
 	private void Disable() {

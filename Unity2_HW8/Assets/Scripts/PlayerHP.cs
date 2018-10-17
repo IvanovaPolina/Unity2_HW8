@@ -3,9 +3,7 @@ using UnityEngine.Networking;
 using UnityEngine.UI;
 
 public class PlayerHP : NetworkBehaviour, IGetDamage {
-
-	[SerializeField]
-	private Transform cameraTransform;
+	
 	[SerializeField]
 	private Transform canvas;
 	[SerializeField]
@@ -16,7 +14,7 @@ public class PlayerHP : NetworkBehaviour, IGetDamage {
 	private int currentHealth = 100;
 
 	private void LateUpdate() {
-		canvas.LookAt(cameraTransform, Vector3.up);
+		canvas.LookAt(Camera.main.transform, Vector3.up);
 	}
 
 	public void GetDamage(int damage) {

@@ -21,9 +21,6 @@ public class PlayerController : NetworkBehaviour {
 	private Material enemyMaterial;
 
 	[SerializeField]
-	private Transform cameraPos;
-
-	[SerializeField]
 	private Transform turret;
 	[SerializeField]
 	private float turretRotSpeed = 40f;
@@ -35,10 +32,6 @@ public class PlayerController : NetworkBehaviour {
 				for (int i = 0; i < rend.materials.Length; i++)
 					if (rend.materials[i].color == playerMaterial.color)
 						rend.materials[i].color = enemyMaterial.color;
-		} else {
-			Camera.main.transform.position = Vector3.zero;
-			Camera.main.transform.rotation = new Quaternion(0, 0, 0, 1);
-			Camera.main.transform.SetParent(cameraPos, false);
 		}
 	}
 

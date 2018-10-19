@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
+using UnityStandardAssets.CrossPlatformInput;
 
 public class PlayerController : NetworkBehaviour {
 
@@ -26,7 +27,10 @@ public class PlayerController : NetworkBehaviour {
 	private float turretRotSpeed = 40f;
 
 	[SerializeField]
-	private Transform cam;
+	private Transform playerCam;
+
+	[SerializeField]
+	private GameObject dualTouchControls;
 
 	private void Start() {
 		if (!isLocalPlayer) {
@@ -36,28 +40,51 @@ public class PlayerController : NetworkBehaviour {
 					if (rend.materials[i].color == playerMaterial.color)
 						rend.materials[i].color = enemyMaterial.color;
 		} else {
-			Camera.main.transform.position = Vector3.zero;
-			Camera.main.transform.rotation = new Quaternion(0, 0, 0, 1);
-			Camera.main.transform.SetParent(cam, false);
+#if !UNITY_ANDROID
+			if (dualTouchControls)
+				Destroy(dualTouchControls);
+#endif
+			Camera c = Instantiate(Camera.main, Vector3.zero, new Quaternion(0, 0, 0, 1));
+			c.transform.SetParent(playerCam, false);
+			c.depth = 0;
 		}
 	}
 
 	private void Update () {
 		if (!isLocalPlayer) return;
+		MoveAndRotate();
+		RotateTurret();
+		Fire();
+	}
 
+	private void MoveAndRotate() {
+#if UNITY_ANDROID
+		float y = CrossPlatformInputManager.GetAxis("Horizontal") * Time.deltaTime * rotationSpeed;
+		float z = CrossPlatformInputManager.GetAxis("Vertical") * Time.deltaTime * moveSpeed;
+#else
 		float y = Input.GetAxis("Horizontal") * Time.deltaTime * rotationSpeed;
 		float z = Input.GetAxis("Vertical") * Time.deltaTime * moveSpeed;
-
+#endif
 		transform.Rotate(0, y, 0);
 		transform.Translate(0, 0, z);
-		RotateTurret();
-		
-		if (Input.GetButtonDown("Fire1")) CmdFire();
 	}
 
 	private void RotateTurret() {
+#if UNITY_ANDROID
+		float y = CrossPlatformInputManager.GetAxis("Turret") * Time.deltaTime * turretRotSpeed;
+#else
 		float y = Input.GetAxis("Turret") * Time.deltaTime * turretRotSpeed;
+#endif
 		turret.Rotate(0, y, 0);
+	}
+
+	private void Fire() {
+#if UNITY_ANDROID
+		bool isFire = CrossPlatformInputManager.GetButtonDown("Fire1");
+#else
+		bool isFire = Input.GetButtonDown("Fire1");
+#endif
+		if (isFire) CmdFire();
 	}
 
 	[Command]

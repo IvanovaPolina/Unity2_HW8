@@ -13,8 +13,11 @@ public class PlayerHP : NetworkBehaviour, IGetDamage {
 	[SyncVar(hook = "ChangeHeath")]
 	private int currentHealth = 100;
 
+	[SerializeField]
+	private Transform playerCam;
+
 	private void LateUpdate() {
-		canvas.LookAt(Camera.main.transform, Vector3.up);
+		canvas.LookAt(playerCam.transform, Vector3.up);
 	}
 
 	public void GetDamage(int damage) {
